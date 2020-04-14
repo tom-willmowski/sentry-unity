@@ -5,39 +5,53 @@ using Sentry;
 
 public class SentryTest : MonoBehaviour
 {
-    private int _counter = 0;
+    private SentryClient client;
+    [SerializeField]
+    private string dsn;
 
-    private void Update()
+    private void Awake()
     {
-        _counter++;
-        if (_counter % 100 == 0) // every 100 frames
+        SentryOptions.Builder builder = new SentryOptions.Builder(dsn);
+        UnityEventProcessor defaultProcessor = new UnityEventProcessor();
+        SentryOptions options = builder
+            .SetDebug(true)
+            .AddExclude("UnityEngine")
+            .SetMaxBreadcrumbs(100)
+            .SetSendDefaultPii(true)
+            .SetEventProcessor(defaultProcessor.Process)
+            .Build();
+        client = new SentryClient(options);
+    }
+
+    private void Start()
+    {
+        Application.logMessageReceived += OnLog;
+    }
+
+    private void OnLog(string condition, string stackTrace, LogType type)
+    {
+        client.AddBreadcrumb(condition);
+        if(type == LogType.Exception)
         {
-            SentrySdk.AddBreadcrumb("Frame number: " + _counter);
+            client.CaptureException(condition, stackTrace, type);
         }
     }
 
-    private new void SendMessage(string message)
+    private void OnDestroy()
     {
-        if (message == "exception")
-        {
-            throw new DivideByZeroException();
-        }
-        else if (message == "assert")
-        {
-            Assert.AreEqual(message, "not equal");
-        }
-        else if (message == "message")
-        {
-            SentrySdk.CaptureMessage("this is a message");
-        }
-        else if (message == "event")
-        {
-            var @event = new SentryEvent("Event message")
-            {
-                level = "debug"
-            };
-
-            SentrySdk.CaptureEvent(@event);
-        }
+        Application.logMessageReceived -= OnLog;
     }
+
+    #region
+    GameObject go = null; 
+    public void Crash()
+    {
+        go.SetActive(true);
+    }
+
+    public void Message()
+    {
+        Debug.Log("Simple message");
+    }
+    #endregion
 }
