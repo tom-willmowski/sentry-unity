@@ -27,7 +27,6 @@ namespace Sentry
 
         public void CaptureException(string condition, string stackTrace, LogType type)
         {
-            Debug.Log($"condition: {condition} stack: {stackTrace}");
             var exc = condition.Split(new char[] {':'}, 2);
             var excType = exc[0];
             var excValue = exc[1].Substring(1);
@@ -40,6 +39,10 @@ namespace Sentry
         public void AddBreadcrumb(string message)
         {
             breadcrumbs.Enqueue(new Breadcrumb(SentryUtils.GetTimestamp(), message));
+            if(breadcrumbs.Count > options.MaxBreadcrumbs)
+            {
+                breadcrumbs.Dequeue();
+            }
         }
 
         public List<Breadcrumb> GetBreadcrumbs()

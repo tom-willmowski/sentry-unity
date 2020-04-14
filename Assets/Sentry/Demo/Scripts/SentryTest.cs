@@ -5,9 +5,9 @@ using Sentry;
 
 public class SentryTest : MonoBehaviour
 {
-    private SentryClient client;
     [SerializeField]
     private string dsn;
+    private SentryClient client;
 
     private void Awake()
     {
@@ -42,7 +42,7 @@ public class SentryTest : MonoBehaviour
         Application.logMessageReceived -= OnLog;
     }
 
-    #region
+    #region Test
     GameObject go = null; 
     public void Crash()
     {
@@ -51,7 +51,7 @@ public class SentryTest : MonoBehaviour
 
     public void Message()
     {
-        Debug.Log("Simple message");
+        Debug.Log($"Simple message {SentryUtils.GetTimestamp()}");
     }
     #endregion
 }
