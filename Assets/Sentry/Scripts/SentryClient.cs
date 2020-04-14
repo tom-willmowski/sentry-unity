@@ -47,7 +47,9 @@ namespace Sentry
 
         public List<Breadcrumb> GetBreadcrumbs()
         {
-            return breadcrumbs.DequeueChunk(options.MaxBreadcrumbs).ToList();
+            List<Breadcrumb> chunk = breadcrumbs.DequeueChunk(options.MaxBreadcrumbs).ToList(); 
+            breadcrumbs.Clear();
+            return chunk;
         }
 
         private void Send(SentryEvent sentryEvent)
